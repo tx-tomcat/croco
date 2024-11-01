@@ -7,11 +7,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CacheService } from '../cache/cache.service';
 import { TelegrafModule } from 'nestjs-telegraf';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     PrismaModule,
     PassportModule,
+    UserModule,
     TelegrafModule.forRoot({
       token: process.env.TELEGRAM_TOKEN,
     }),

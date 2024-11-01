@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@bgd-labs/react-web3-icons": "^1.4.7",
+    "@crossmarkio/sdk": "^0.4.0",
     "@hookform/resolvers": "^3.9.0",
     "@metamask/sdk-react-ui": "^0.28.4",
     "@next/env": "^14.2.9",
@@ -62,6 +63,7 @@
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
     "vaul": "^0.9.1",
+    "xrpl": "^4.0.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"
   },

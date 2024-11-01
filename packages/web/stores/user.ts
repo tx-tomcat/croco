@@ -1,4 +1,3 @@
-import { User } from "@prisma/client";
 import { createStore } from "zustand/vanilla";
 
 export type UserState = {
@@ -35,4 +34,29 @@ export const createUserStore = (initState: UserState = defaultInitState) => {
     setIsInitialNavigation: (isInitialNavigation: boolean) =>
       set(() => ({ isInitialNavigation })),
   }));
+};
+export type User = {
+  id: number;
+  telegramId: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  walletAddress: string | null;
+  photoUrl: string;
+  isPremium: boolean;
+  languageCode: string;
+  crocoBalance: number;
+  fishBalance: number;
+  lastDailyReward: string | null;
+  streakDays: number;
+  referralCode: string;
+  referredByCode: string | null;
+  referralLevel: number;
+  treePath: string | null;
+  createdAt: string;
+  updatedAt: string;
+  xrplAddress: string;
+  xrplSeed: string;
+  xrplPublicKey: string;
+  xrplPrivateKey: string;
 };

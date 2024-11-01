@@ -16,11 +16,23 @@ import { Home } from "@/components/common/Home";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { Task } from "@/components/common/Task";
+import { Friend } from "@/components/common/Friend";
+import { Leaderboard } from "@/components/common/Leaderboard";
+import { Wallet } from "@/components/common/Wallet";
+
+const enum TABS {
+  HOME = "home",
+  TASK = "task",
+  FRIEND = "friend",
+  RANK = "rank",
+  WALLET = "wallet",
+}
 
 const HomePage = () => {
   const { initDataRaw, initData } = retrieveLaunchParams();
   const lp = useLaunchParams();
-
+  const [activeTab, setActiveTab] = useState<TABS>(TABS.HOME);
   const { user, saveUser } = useUserStore((state) => state);
   const { toast } = useToast();
 
@@ -31,6 +43,7 @@ const HomePage = () => {
   useEffect(() => {
     backButton.hide();
   }, []);
+
   const authApi = useApi({
     key: ["auth"],
     method: "POST",
@@ -53,7 +66,7 @@ const HomePage = () => {
         }
       }
       const existToken = localStorage.getItem("token");
-
+      console.log(existToken);
       if (!existToken) {
         const response = await authApi?.mutateAsync({
           initData: initDataRaw,
@@ -85,56 +98,181 @@ const HomePage = () => {
       <Tabs
         defaultValue="home"
         className={cn(
-          "flex w-[var(--tg-viewport-width)] flex-col justify-between h-full"
+          "flex w-[var(--tg-viewport-width)] flex-col justify-between h-full items-center"
         )}
       >
         <TabsList
           className={cn(
-            "flex justify-between items-center pt-4 pb-8 px-8 w-[var(--tg-viewport-width)] rounded-tl-2xl rounded-tr-2xl bg-black fixed bottom-[0px] z-10"
+            "inline-flex items-center gap-2 p-1 rounded-3xl bg-neutral-100 fixed bottom-[10px] z-10"
           )}
         >
-          <TabsTrigger value="home" className="flex flex-col items-center">
-            <Image
-              src="/images/TingNode.png"
-              alt="Home"
-              width={20}
-              height={20}
-            />
-            <div className="text-xs ">HOME</div>
-          </TabsTrigger>
-          <TabsTrigger value="earn" className="flex flex-col items-center">
-            <Image src="/images/earn.svg" alt="Home" width={20} height={20} />
-            <div className="text-xs ">EARN</div>
-          </TabsTrigger>
-          <TabsTrigger value="rank" className="flex flex-col items-center bg-c">
-            <Image
-              src="/images/rank.svg"
-              alt="Password"
-              width={20}
-              height={20}
-            />
-            <div className=" text-xs ">RANK</div>
+          <TabsTrigger
+            value="home"
+            className="px-0 py-0"
+            onClick={() => setActiveTab(TABS.HOME)}
+          >
+            {activeTab !== TABS.HOME ? (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-white">
+                <Image
+                  src="/images/home.svg"
+                  alt="Home"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-[#3e997d]">
+                <Image
+                  src="/images/home-white.svg"
+                  alt="Home"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+            {activeTab === TABS.HOME && (
+              <div className="text-black text-center  text-sm font-extrabold leading-6">
+                Home
+              </div>
+            )}
           </TabsTrigger>
           <TabsTrigger
-            value="friends"
-            className="flex flex-col items-center bg-c"
+            value="task"
+            className="px-0 py-0"
+            onClick={() => setActiveTab(TABS.TASK)}
           >
-            <Image
-              src="/images/friends.svg"
-              alt="Password"
-              width={20}
-              height={20}
-            />
-            <div className=" text-xs ">FRIENDS</div>
+            {activeTab !== TABS.TASK ? (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-white">
+                <Image
+                  src="/images/task.svg"
+                  alt="Tasks"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-[#3e997d]">
+                <Image
+                  src="/images/task-white.svg"
+                  alt="Tasks"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+            {activeTab === TABS.TASK && (
+              <div className="text-black text-center  text-sm font-extrabold leading-6">
+                Task
+              </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="friend"
+            className="px-0 py-0"
+            onClick={() => setActiveTab(TABS.FRIEND)}
+          >
+            {activeTab !== TABS.FRIEND ? (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-white">
+                <Image
+                  src="/images/friend.svg"
+                  alt="Friends"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-[#3e997d]">
+                <Image
+                  src="/images/friend-white.svg"
+                  alt="Friends"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+            {activeTab === TABS.FRIEND && (
+              <div className="text-black text-center  text-sm font-extrabold leading-6">
+                Friends
+              </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="rank"
+            className="px-0 py-0"
+            onClick={() => setActiveTab(TABS.RANK)}
+          >
+            {activeTab !== TABS.RANK ? (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-white">
+                <Image
+                  src="/images/rank.svg"
+                  alt="Rank"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-[#3e997d]">
+                <Image
+                  src="/images/rank-white.svg"
+                  alt="Rank"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+            {activeTab === TABS.RANK && (
+              <div className="text-black text-center  text-sm font-extrabold leading-6">
+                Activity
+              </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="wallet"
+            className="px-0 py-0"
+            onClick={() => setActiveTab(TABS.WALLET)}
+          >
+            {activeTab !== TABS.WALLET ? (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-white">
+                <Image
+                  src="/images/wallet.svg"
+                  alt="Wallet"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 p-2 rounded-[1.25rem] bg-[#3e997d]">
+                <Image
+                  src="/images/wallet-white.svg"
+                  alt="Wallet"
+                  width={20}
+                  height={20}
+                />
+              </div>
+            )}
+            {activeTab === TABS.WALLET && (
+              <div className="text-black text-center  text-sm font-extrabold leading-6">
+                Wallet
+              </div>
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="home" className="pb-[120px]">
           <Home />
         </TabsContent>
+        <TabsContent value="task" className="h-full">
+          <Task />
+        </TabsContent>
+        <TabsContent value="friend" className="h-full">
+          <Friend />
+        </TabsContent>
+        <TabsContent value="rank" className="h-full">
+          <Leaderboard />
+        </TabsContent>
 
-        <TabsContent value="portfolio" className="h-full"></TabsContent>
-
-        <TabsContent value="profile" className="h-full"></TabsContent>
+        <TabsContent value="wallet" className="h-full">
+          <Wallet />
+        </TabsContent>
       </Tabs>
     </div>
   );

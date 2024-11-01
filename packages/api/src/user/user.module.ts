@@ -7,6 +7,15 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TelegrafModule } from 'nestjs-telegraf';
+import { EggService } from './egg.service';
+import { SpeedUpgradeService } from './speed.service';
+import { AutoHatchingService } from './auto-hatching.service';
+import { BoostService } from './boost.service';
+import { BoostController } from './boost.controller';
+import { SpeedUpgradeController } from './speed-upgrade.controller';
+import { AutoHatchingController } from './auto-hatching.controller';
+import { ReferralRewardService } from './referral-reward.service';
+
 @Module({
   imports: [
     PrismaModule,
@@ -15,13 +24,23 @@ import { TelegrafModule } from 'nestjs-telegraf';
       token: process.env.TELEGRAM_TOKEN,
     }),
   ],
-  controllers: [UserController],
+  controllers: [
+    UserController,
+    BoostController,
+    SpeedUpgradeController,
+    AutoHatchingController,
+  ],
   providers: [
     UserService,
+    EggService,
+    SpeedUpgradeService,
+    AutoHatchingService,
+    BoostService,
     UserController,
     UserCacheInterceptor,
     CacheService,
     JwtService,
+    ReferralRewardService,
   ],
   exports: [UserService],
 })

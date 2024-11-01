@@ -19,9 +19,9 @@ export const viewport: Viewport = {
   maximumScale: 1.0,
   userScalable: false,
 };
-const formula = localFont({
-  src: "../public/fonts/NUSAR.ttf",
-  variable: "--font-nusa",
+const vonca = localFont({
+  src: "../public/fonts/vonca.otf",
+  variable: "--font-vonca",
 });
 
 export default function RootLayout({ children }: PropsWithChildren) {
@@ -31,12 +31,12 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <Script src="https://telegram.org/js/telegram-web-app.js"></Script>
 
       <body
-        className={`${formula.variable} bg-[#141414] w-[var(--tg-viewport-width)] h-[var(--tg-viewport-height)]`}
+        className={`${vonca.variable} bg-[#EBEBEB] w-[var(--tg-viewport-width)] h-[var(--tg-viewport-height)]`}
       >
         <UserStoreProvider>
           <Root>{children}</Root>
         </UserStoreProvider>
-        <GoogleAnalytics gaId="G-Z2EWJRB6K1" />
+        {/* <GoogleAnalytics gaId="G-Z2EWJRB6K1" /> */}
       </body>
     </html>
   );

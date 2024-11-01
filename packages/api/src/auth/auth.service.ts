@@ -3,10 +3,11 @@ import { JwtService } from '@nestjs/jwt';
 import { parse, validate } from '@telegram-apps/init-data-node';
 import { customAlphabet } from 'nanoid';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
-import { getTelegramUserAge } from '../utils/utils';
+import { Egg, User } from '@prisma/client';
 import { Telegraf } from 'telegraf';
 import { InjectBot } from 'nestjs-telegraf';
+import { Client, Wallet } from 'xrpl';
+import { EggService } from '../user/egg.service';
 (BigInt.prototype as any).toJSON = function (): number {
   return this.toString();
 };
@@ -14,14 +15,56 @@ import { InjectBot } from 'nestjs-telegraf';
 @Injectable()
 export class AuthService {
   private nanoid: (size?: number) => string;
+  private xrplClient: Client;
 
   constructor(
     private jwtService: JwtService,
     private readonly prismaService: PrismaService,
+    private readonly eggService: EggService,
     @InjectBot() private bot: Telegraf,
   ) {
     const alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     this.nanoid = customAlphabet(alphabet, 8);
+    this.xrplClient = new Client(
+      process.env.XRPL_NODE_URL || 'wss://s.altnet.rippletest.net:51233',
+    );
+  }
+
+  async createXrplWallet(userId: bigint): Promise<{
+    address: string;
+    seed: string;
+    publicKey: string;
+    privateKey: string;
+  }> {
+    try {
+      await this.xrplClient.connect();
+
+      // Generate new wallet
+      const wallet = Wallet.generate();
+
+      // Store wallet details in database
+      await this.prismaService.user.update({
+        where: { telegramId: userId },
+        data: {
+          xrplAddress: wallet.address,
+          xrplSeed: wallet.seed,
+          xrplPublicKey: wallet.publicKey,
+          xrplPrivateKey: wallet.privateKey,
+        },
+      });
+
+      await this.xrplClient.disconnect();
+
+      return {
+        address: wallet.address,
+        seed: wallet.seed,
+        publicKey: wallet.publicKey,
+        privateKey: wallet.privateKey,
+      };
+    } catch (error) {
+      console.error('Error creating XRPL wallet:', error);
+      throw new Error('Failed to create XRPL wallet');
+    }
   }
 
   async validateUser(initData: string): Promise<any> {
@@ -55,22 +98,21 @@ export class AuthService {
     const newReferralCode = await this.generateReferralCode();
 
     let referrer: User | null = null;
+    let treePath = '';
     if (referralCode) {
       referrer = await this.prismaService.user.findUnique({
         where: { referralCode },
       });
       if (referrer) {
-        await this.prismaService.user.update({
-          where: { id: referrer.id },
-          data: {
-            xpBalance: {
-              increment: user.isPremium ? 1000 : 100,
-            },
-          },
-        });
+        treePath = referrer.treePath;
+        const referrerPathParts = referrer.treePath.split('.');
+        if (referrerPathParts.length < 5) {
+          treePath = `${referrer.treePath}${treePath === '' ? '' : '.'}${referralCode}`;
+        } else {
+          treePath = `${referrerPathParts.slice(1).join('.')}.${referralCode}`;
+        }
       }
     }
-    const userAge = getTelegramUserAge(user.id);
     const images = await this.bot.telegram.getUserProfilePhotos(user.id, 0);
     const profilePhoto = images.photos[0]?.[0]?.file_id;
     let photo_url = null;
@@ -89,11 +131,7 @@ export class AuthService {
         lastName: user.lastName,
         languageCode: user.languageCode,
         photoUrl: photo_url,
-        level: userAge,
         isPremium: user.isPremium,
-        refBalance: {
-          increment: user.isPremium ? 1000 : 100,
-        },
       },
       create: {
         telegramId: user.id,
@@ -104,11 +142,16 @@ export class AuthService {
         photoUrl: photo_url,
         isPremium: user.isPremium,
         referralCode: newReferralCode,
-        level: userAge,
         referredByCode: referrer?.referralCode,
       },
     });
-
+    const activeEgg = await this.eggService.getActiveEgg(userDB.id);
+    if (!activeEgg) {
+      await this.eggService.createEgg(userDB.id);
+    }
+    if (!userDB.xrplAddress) {
+      await this.createXrplWallet(userDB.telegramId);
+    }
     const payload = { ...userDB };
 
     return {

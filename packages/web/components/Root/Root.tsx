@@ -29,7 +29,7 @@ function App(props: PropsWithChildren) {
   const viewport = useViewport();
 
   useEffect(() => {
-    miniApp.setHeaderColor("#000000");
+    miniApp.setHeaderColor("#EBEBEB");
     return bindMiniAppCSSVars(miniApp, themeParams);
   }, [miniApp, themeParams]);
 

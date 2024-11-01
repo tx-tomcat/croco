@@ -3,7 +3,7 @@ import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/utils/utils";
 export const baseUrl =
   process.env.NEXT_RUNTIME_NODE_ENV === "development"
-    ? "https://abc054f586b4.ngrok.app/api/v1"
+    ? "https://f96c46c75e18.ngrok.app/api/v1"
     : "/api/v1";
 export const config = () => {
   return {

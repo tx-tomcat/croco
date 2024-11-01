@@ -40,7 +40,7 @@ export function getLevelByLimit(limit: number): number {
   return Math.floor((limit - 500) / 100);
 }
 
-export function shortenEthAddress(address: string): string {
+export function shortenAddress(address: string): string {
   if (!address || address.length < 10) return address;
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
