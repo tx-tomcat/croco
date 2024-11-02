@@ -1,5 +1,9 @@
 // egg.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -7,13 +11,12 @@ export class EggService {
   constructor(private prisma: PrismaService) {}
 
   async createEgg(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { egg: true },
+    const existingEgg = await this.prisma.egg.findUnique({
+      where: { userId },
     });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
+    if (existingEgg) {
+      return existingEgg;
     }
 
     // Create new egg with isIncubating set to false initially
