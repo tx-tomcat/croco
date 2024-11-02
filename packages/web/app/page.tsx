@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import useApi from "@/hooks/useApi";
 import {
@@ -32,20 +32,14 @@ const enum TABS {
 const HomePage = () => {
   const { initDataRaw, initData } = retrieveLaunchParams();
   const lp = useLaunchParams();
-  const [activeTab, setActiveTab] = useState<TABS>(TABS.HOME);
-  const { user, saveUser } = useUserStore((state) => state);
-  const { toast } = useToast();
+  const loginInProgress = useRef(false);
+  const [activeTab, setActiveTab] = React.useState<TABS>(TABS.HOME);
+  const { saveUser } = useUserStore((state) => state);
 
-  const router = useRouter();
   const [backButton] = initBackButton();
-  const utils = useUtils();
-
-  useEffect(() => {
-    backButton.hide();
-  }, []);
 
   const authApi = useApi({
-    key: ["auth"],
+    key: ["login"],
     method: "POST",
     url: "auth/login",
   }).post;
@@ -56,42 +50,56 @@ const HomePage = () => {
     url: "user/me",
   }).get;
 
-  const checkTelegramAge = async () => {
+  const initAuth = async () => {
+    // If login is already in progress, skip
+    if (loginInProgress.current) return;
+    loginInProgress.current = true;
+
     try {
       const existUser = localStorage.getItem("user");
-      if (existUser) {
+      const existToken = localStorage.getItem("token");
+
+      // Check if user changed
+      if (existUser && initData?.user) {
         const localUser = JSON.parse(existUser);
-        if (initData?.user?.id !== localUser?.id) {
+        if (initData.user.id !== localUser.id) {
           localStorage.clear();
         }
       }
-      const existToken = localStorage.getItem("token");
-      console.log(existToken);
+
+      // Update stored user
+      if (initData?.user) {
+        localStorage.setItem("user", JSON.stringify(initData.user));
+      }
+
+      // Only login if no token exists
       if (!existToken) {
         const response = await authApi?.mutateAsync({
           initData: initDataRaw,
           referralCode: lp.startParam,
         });
-        if (response.access_token) {
+
+        if (response?.access_token) {
           localStorage.setItem("token", response.access_token);
         }
       }
-      localStorage.setItem("user", JSON.stringify(initData?.user));
-      await getUser();
+
+      // Get user data
+      const me = await getMe?.refetch();
+      if (me?.data) {
+        saveUser(me.data);
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Auth initialization failed:", error);
+    } finally {
+      loginInProgress.current = false;
     }
   };
 
-  const getUser = async () => {
-    const me = await getMe?.refetch();
-    saveUser(me?.data);
-  };
   useEffect(() => {
-    if (initDataRaw) {
-      checkTelegramAge();
-    }
-  }, [initDataRaw]);
+    backButton.hide();
+    initAuth();
+  }, []);
 
   return (
     <div className="flex w-[var(--tg-viewport-width)] px-8 flex-col h-full items-center">
@@ -270,7 +278,7 @@ const HomePage = () => {
           <Leaderboard />
         </TabsContent>
 
-        <TabsContent value="wallet" className="h-full">
+        <TabsContent value="wallet" className="h-full w-full p-8">
           <Wallet />
         </TabsContent>
       </Tabs>

@@ -8,40 +8,45 @@ datasource db {
 }
 
 model User {
-  id              Int            @id @default(autoincrement())
-  telegramId      BigInt         @unique
-  firstName       String?
-  lastName        String?
-  username        String?
-  walletAddress   String?
-  photoUrl        String?
-  isPremium       Boolean        @default(false)
-  languageCode    String?
-  crocoBalance    Float          @default(0)
-  fishBalance     Float          @default(0)
-  lastDailyReward DateTime?
-  streakDays      Int            @default(0)
-  referralCode    String         @unique
-  referredByCode  String?
-  referralLevel   Int            @default(0)
-  treePath        String?
-  xrplAddress     String?        @unique
-  xrplSeed        String?
-  xrplPublicKey   String?
-  xrplPrivateKey  String?
-  autoBoosts      AutoBoost[]
-  autoHatching    AutoHatching[]
-  eggs            Egg[]
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                   Int            @id @default(autoincrement())
+  telegramId           BigInt         @unique
+  firstName            String?
+  lastName             String?
+  username             String?
+  walletAddress        String?
+  photoUrl             String?
+  isPremium            Boolean        @default(false)
+  languageCode         String?
+  crocoBalance         Float          @default(0)
+  fishBalance          Float          @default(0)
+  lastDailyReward      DateTime?
+  streakDays           Int            @default(0)
+  referralCode         String         @unique
+  referredByCode       String?
+  referralToken        Float          @default(0)
+  totalTokenReferral   Float          @default(0)
+  claimedTokenReferral Float          @default(0)
+  referralLevel        Int            @default(0)
+  treePath             String?
+  xrplAddress          String?        @unique
+  xrplSeed             String?
+  xrplPublicKey        String?
+  xrplPrivateKey       String?
+  autoBoosts           AutoBoost[]
+  autoHatching         AutoHatching?
+  egg                  Egg?
+  speedUpgrade         SpeedUpgrade[]
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 }
 
 model SpeedUpgradeItem {
-  id        Int      @id @default(autoincrement())
-  speed     Float    @default(2)
-  price     Float    @default(10000)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int            @id @default(autoincrement())
+  speed        Float          @default(2)
+  price        Float          @default(10000)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  speedUpgrade SpeedUpgrade[]
 }
 
 model BoostUpgradeItem {
@@ -55,7 +60,7 @@ model BoostUpgradeItem {
 
 model AutoHatching {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId    Int      @unique
   user      User     @relation(fields: [userId], references: [id])
   price     Float    @default(500)
   createdAt DateTime @default(now())
@@ -65,32 +70,41 @@ model AutoHatching {
 model FishItem {
   id        Int   @id @default(autoincrement())
   amount    Float @default(1)
-  priceTON  Float
-  priceStar Float
+  priceXrpl Float @default(0)
+  priceStar Float @default(0)
 }
 
-
 model Egg {
-  id                  Int      @id @default(autoincrement())
-  userId              Int
-  user                User     @relation(fields: [userId], references: [id])
-  hatchProgress       Float    @default(0)
-  hatchSpeed          Float    @default(1)
-  isIncubating        Boolean  @default(false)
+  id                  Int       @id @default(autoincrement())
+  userId              Int       @unique
+  user                User      @relation(fields: [userId], references: [id])
+  hatchProgress       Float     @default(0)
+  hatchSpeed          Float     @default(1)
+  isIncubating        Boolean   @default(false)
   lastIncubationStart DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model AutoBoost {
   id         Int      @id @default(autoincrement())
   userId     Int
   user       User     @relation(fields: [userId], references: [id])
-  boostType  String // e.g., "hatchSpeed", "tokenMultiplier"
+  boostType  String // e.g., "speedSelected", "tokenMultiplier"
   multiplier Float
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model SpeedUpgrade {
+  id            Int              @id @default(autoincrement())
+  userId        Int
+  user          User             @relation(fields: [userId], references: [id])
+  speedId       Int
+  selectedSpeed SpeedUpgradeItem @relation(fields: [speedId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 model DailyReward {
@@ -112,7 +126,7 @@ model Fish {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
-  priceTON    Float
+  priceXrpl   Float
   priceStar   Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

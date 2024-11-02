@@ -9,8 +9,8 @@ import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
-  title: "Zupad - Get Zupad on Telegram",
-  description: "Get Zupad on Telegram",
+  title: "Croco - Get Croco on Telegram",
+  description: "Get Croco on Telegram",
 };
 export const viewport: Viewport = {
   themeColor: "black",

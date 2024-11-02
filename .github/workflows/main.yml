@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /root/zupad/
+            cd /root/croco/
             git pull origin main 
             docker compose up -d --build --remove-orphans --scale app=3
             docker rollout app

@@ -47,6 +47,9 @@ export type User = {
   languageCode: string;
   crocoBalance: number;
   fishBalance: number;
+  totalTokenReferral: number;
+  claimedTokenReferral: number;
+  referralToken: number;
   lastDailyReward: string | null;
   streakDays: number;
   referralCode: string;
@@ -59,4 +62,41 @@ export type User = {
   xrplSeed: string;
   xrplPublicKey: string;
   xrplPrivateKey: string;
+  egg: {
+    id: number;
+    userId: number;
+    hatchProgress: number;
+    hatchSpeed: number;
+    isIncubating: boolean;
+    lastIncubationStart: string | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
+  autoBoosts: {
+    id: number;
+    userId: number;
+    boostType: string;
+    multiplier: number;
+    expiresAt: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  autoHatching: {
+    id: number;
+    userId: number;
+    price: number;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+  speedUpgrade: {
+    id: number;
+    userId: number;
+    speedId: number;
+    selectedSpeed: {
+      id: number;
+      speed: number;
+    };
+    createdAt: string;
+    updatedAt: string;
+  }[];
 };

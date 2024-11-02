@@ -1,4 +1,4 @@
-name: zupadapp
+name: crocoapp
 services:
   app:
     build: ..

@@ -1,10 +1,20 @@
-import { usdtAbi } from "@/lib/usdt_abi";
-import { zukipointAbi } from "@/lib/zukipoint_abi";
-import { zukiverseAbi } from "@/lib/zukiverse_abi";
 import axios from "axios";
-import { detect } from "detect-browser";
-import { formatEther } from "viem";
+interface SelectedSpeed {
+  id: number;
+  speed: number;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
+interface SpeedUpgrade {
+  id: number;
+  userId: number;
+  speedId: number;
+  createdAt: string;
+  updatedAt: string;
+  selectedSpeed: SelectedSpeed;
+}
 export const axiosInstance = axios.create({
   baseURL: process.env.BACKEND_URL,
 });
@@ -22,6 +32,9 @@ const data = [
   { year: 2023, cumulativeDownloads: 3265000000, age: 1 },
   { year: 2024, cumulativeDownloads: 4165000000, age: 0.5 },
 ];
+
+export const BASE_HATCH_TIME = 4 * 60 * 60 * 1000;
+export const BASE_REWARD_AMOUNT = 144;
 
 export function getTelegramUserAge(userId: number): number {
   for (let i = 0; i < data.length; i++) {
@@ -44,3 +57,46 @@ export function shortenAddress(address: string): string {
   if (!address || address.length < 10) return address;
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
+
+export const getCurrentSpeed = (speedUpgrades: SpeedUpgrade[]): number => {
+  if (!speedUpgrades || speedUpgrades.length === 0) {
+    return 1; // Default speed if no upgrades
+  }
+
+  // Find max speed using reduce
+  return speedUpgrades.reduce((maxSpeed, upgrade) => {
+    return Math.max(maxSpeed, upgrade.selectedSpeed.speed);
+  }, 1);
+};
+
+// Alternative using map and Math.max
+export const getCurrentSpeedAlt = (speedUpgrades: SpeedUpgrade[]): number => {
+  if (!speedUpgrades || speedUpgrades.length === 0) {
+    return 1; // Default speed if no upgrades
+  }
+
+  return Math.max(
+    ...speedUpgrades.map((upgrade) => upgrade.selectedSpeed.speed)
+  );
+};
+
+export const getNextSpeedLevel = (speed: number): number => {
+  switch (speed) {
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 5;
+    case 5:
+      return 8;
+    case 8:
+      return 13;
+    case 13:
+      return 20;
+    case 20:
+      return 25;
+    default:
+      return speed;
+  }
+};

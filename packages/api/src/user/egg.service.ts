@@ -9,7 +9,7 @@ export class EggService {
   async createEgg(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { eggs: true },
+      include: { egg: true },
     });
 
     if (!user) {
@@ -34,7 +34,6 @@ export class EggService {
     const activeEgg = await this.prisma.egg.findFirst({
       where: {
         userId,
-        isIncubating: true,
       },
     });
 

@@ -1,17 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import useApi from "@/hooks/useApi";
 import { Button } from "../ui/button";
 import { Shop } from "./Shop";
+import { useUserStore } from "@/stores/provider";
+import { getCurrentSpeed, getNextSpeedLevel } from "@/utils/utils";
+import { useToast } from "../ui/use-toast";
 
 export const Upgrade = () => {
+  const { toast } = useToast();
   const [showShop, setShowShop] = useState(false);
+  const { user, saveUser } = useUserStore((state) => state);
+
   const getSpeedList = useApi({
     key: ["getSpeedList"],
     method: "GET",
     url: "user/speed-list",
+  }).get;
+
+  const getMe = useApi({
+    key: ["getMe"],
+    method: "GET",
+    url: "user/me",
   }).get;
 
   const getBoostList = useApi({
@@ -20,10 +32,32 @@ export const Upgrade = () => {
     url: "user/boost-list",
   }).get;
 
+  const speedUpgradeApi = useApi({
+    key: ["speedUpgrade"],
+    method: "POST",
+    url: "speed-upgrade/purchase",
+  }).post;
+
+  const autoHatchApi = useApi({
+    key: ["autoHatch"],
+    method: "POST",
+    url: "auto-hatching/purchase",
+  }).post;
+
+  const boostPurchaseApi = useApi({
+    key: ["boostPurchase"],
+    method: "POST",
+    url: "boosts/purchase",
+  }).post;
+
   useEffect(() => {
     getSpeedList?.refetch();
     getBoostList?.refetch();
   }, []);
+
+  const currentSpeed = useMemo(() => {
+    return getCurrentSpeed(user?.speedUpgrade || []);
+  }, [user?.speedUpgrade]);
 
   if (showShop) {
     return <Shop />;
@@ -63,7 +97,7 @@ export const Upgrade = () => {
                 height={32}
               />
               <div className="13_000 text-[#3e997d] text-2xl leading-8 capitalize">
-                13,000
+                {user?.crocoBalance.toLocaleString()}
               </div>
             </div>
           </div>
@@ -76,21 +110,49 @@ export const Upgrade = () => {
                   index === getSpeedList?.data?.length - 1 && "w-full"
                 )}
               >
-                <div className="lex flex-col items-start gap-1 p-4 rounded-3xl border border-white w-full">
+                <div className="lex flex-col items-start gap-2 p-4 rounded-3xl border border-white w-full">
                   <div className="x2_tokens_every_4_hours self-stretch text-black text-sm font-semibold leading-6 capitalize">
                     x{item.speed} tokens every 4 hours
                   </div>
                   <div className="flex items-center">
-                    <div className="flex justify-center items-center w-6 h-6">
-                      <div className="lightgray 50% / cover no-repeat] flex-shrink-0 w-6 h-6 bg-[url(<path-to-image>)" />
-                    </div>
+                    <Image
+                      src="/images/croco.png"
+                      alt="Coin"
+                      width={24}
+                      height={24}
+                    />
                     <div className="10_000 text-[#3e997d] text-sm font-semibold leading-6 capitalize">
                       {item.price.toLocaleString()}
                     </div>
                   </div>
-                  <div className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa] font-medium leading-6 capitalize">
-                    Upgrade
-                  </div>
+                  <Button
+                    disabled={
+                      (user?.crocoBalance && user?.crocoBalance < item.price) ||
+                      getNextSpeedLevel(currentSpeed) != item.speed ||
+                      speedUpgradeApi?.isPending
+                    }
+                    isLoading={speedUpgradeApi?.isPending}
+                    className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa] font-medium leading-6 capitalize w-full"
+                    onClick={() =>
+                      speedUpgradeApi
+                        ?.mutateAsync({
+                          packageId: item.id,
+                        })
+                        .then(() =>
+                          getMe?.refetch().then((resp) => {
+                            if (resp.data) {
+                              saveUser(resp.data);
+                            }
+                          })
+                        )
+                    }
+                  >
+                    {user?.crocoBalance && user?.crocoBalance >= item.price
+                      ? getNextSpeedLevel(currentSpeed) === item.speed
+                        ? "Upgrade"
+                        : "Not available"
+                      : "Not enough"}
+                  </Button>
                 </div>
               </div>
             ))}
@@ -102,7 +164,7 @@ export const Upgrade = () => {
             <div className="flex items-center">
               <Image src="/images/fish.svg" alt="Coin" width={32} height={32} />
               <div className="13_000 text-[#3e997d] text-2xl leading-8 capitalize">
-                13,000
+                {user?.fishBalance.toLocaleString()}
               </div>
             </div>
             <Image
@@ -129,8 +191,35 @@ export const Upgrade = () => {
                 500
               </div>
             </div>
-            <Button className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa] font-medium leading-6 capitalize">
-              Buy
+            <Button
+              isLoading={autoHatchApi?.isPending}
+              disabled={autoHatchApi?.isPending || !!user?.autoHatching}
+              className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa] font-medium leading-6 capitalize"
+              onClick={() =>
+                autoHatchApi
+                  ?.mutateAsync({})
+                  .then((resp) => {
+                    toast({
+                      description: resp.success
+                        ? "Auto hatching purchased"
+                        : resp.message,
+                      variant: resp.success ? "success" : "error",
+                    });
+                    getMe?.refetch().then((resp) => {
+                      if (resp.data) {
+                        saveUser(resp.data);
+                      }
+                    });
+                  })
+                  .catch(() => {
+                    toast({
+                      description: "Something went wrong",
+                      variant: "error",
+                    });
+                  })
+              }
+            >
+              {user?.autoHatching ? "Active" : "Buy"}
             </Button>
           </div>
         </TabsContent>
@@ -140,7 +229,7 @@ export const Upgrade = () => {
             <div className="flex items-center">
               <Image src="/images/fish.svg" alt="Coin" width={32} height={32} />
               <div className="13_000 text-[#3e997d] text-2xl leading-8 capitalize">
-                13,000
+                {user?.fishBalance.toLocaleString()}
               </div>
             </div>
             <Image
@@ -176,9 +265,36 @@ export const Upgrade = () => {
                     {item.fishPrice.toLocaleString()}
                   </div>
                 </div>
-                <div className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa]  font-medium leading-6 capitalize">
+                <Button
+                  isLoading={boostPurchaseApi?.isPending}
+                  disabled={boostPurchaseApi?.isPending}
+                  className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa]  font-medium leading-6 capitalize"
+                  onClick={() =>
+                    boostPurchaseApi
+                      ?.mutateAsync({ boostId: item.id })
+                      .then((resp) => {
+                        toast({
+                          description: resp.success
+                            ? "Boost purchased"
+                            : resp.message,
+                          variant: resp.success ? "success" : "error",
+                        });
+                        getMe?.refetch().then((resp) => {
+                          if (resp.data) {
+                            saveUser(resp.data);
+                          }
+                        });
+                      })
+                      .catch(() => {
+                        toast({
+                          description: "Something went wrong",
+                          variant: "error",
+                        });
+                      })
+                  }
+                >
                   Buy
-                </div>
+                </Button>
               </div>
             ))}
           </div>

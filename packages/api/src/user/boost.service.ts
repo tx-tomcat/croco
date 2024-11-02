@@ -3,24 +3,76 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+export interface BoostDetails {
+  id: number;
+  speed: number;
+  duration: number;
+  fishPrice: number;
+  active: boolean;
+  remainingTime?: number;
+}
+
 @Injectable()
 export class BoostService {
   private readonly logger = new Logger(BoostService.name);
-  private readonly INITIAL_BOOST_HOURS = 4;
-  private readonly TOTAL_BOOST_HOURS = 24;
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Get available boosts with active status for user
+   */
+  async getAvailableBoosts(userId: number): Promise<BoostDetails[]> {
+    try {
+      // Get all boost packages
+      const boostPackages = await this.prisma.boostUpgradeItem.findMany({
+        orderBy: { speed: 'asc' },
+      });
+
+      // Get user's active boosts
+      const activeBoosts = await this.prisma.autoBoost.findMany({
+        where: {
+          userId,
+          boostType: 'speed',
+          expiresAt: { gt: new Date() },
+        },
+      });
+
+      // Map boosts with active status and remaining time
+      return boostPackages.map((boost) => {
+        const activeBoost = activeBoosts.find(
+          (ab) => ab.multiplier === boost.speed,
+        );
+
+        return {
+          id: boost.id,
+          speed: boost.speed,
+          duration: boost.duration,
+          fishPrice: boost.fishPrice,
+          active: !!activeBoost,
+          remainingTime: activeBoost
+            ? Math.max(0, activeBoost.expiresAt.getTime() - Date.now()) / 1000
+            : undefined,
+        };
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get available boosts: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Purchase and activate a boost
+   */
   async purchaseBoost(
     userId: number,
     boostId: number,
   ): Promise<{
     success: boolean;
     message: string;
-    boost?: any;
+    boost?: BoostDetails;
   }> {
     try {
-      // Get the boost package
+      // Get boost package
       const boostPackage = await this.prisma.boostUpgradeItem.findUnique({
         where: { id: boostId },
       });
@@ -32,21 +84,26 @@ export class BoostService {
         };
       }
 
-      // Check user's fish balance
+      // Check if user has an active boost of the same speed
+      const existingBoost = await this.prisma.autoBoost.findFirst({
+        where: {
+          userId,
+          boostType: 'speed',
+          multiplier: boostPackage.speed,
+          expiresAt: { gt: new Date() },
+        },
+      });
+
+      if (existingBoost) {
+        return {
+          success: false,
+          message: 'This boost is already active',
+        };
+      }
+
+      // Get user's fish balance
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        include: {
-          autoBoosts: {
-            where: {
-              boostType: {
-                in: ['crocoBoost', 'speedBoost'],
-              },
-              expiresAt: {
-                gt: new Date(),
-              },
-            },
-          },
-        },
       });
 
       if (!user) {
@@ -63,25 +120,12 @@ export class BoostService {
         };
       }
 
-      // Check for active boosts
-      if (user.autoBoosts.length > 0) {
-        return {
-          success: false,
-          message: 'Another boost is already active',
-        };
-      }
+      // Calculate boost duration in hours
+      const durationHours = boostPackage.duration * 24; // Convert days to hours
+      const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000);
 
-      // Calculate expiration times
-      const now = new Date();
-      const initialBoostExpires = new Date(
-        now.getTime() + this.INITIAL_BOOST_HOURS * 60 * 60 * 1000,
-      );
-      const totalBoostExpires = new Date(
-        now.getTime() + this.TOTAL_BOOST_HOURS * 60 * 60 * 1000,
-      );
-
-      // Process the boost purchase in a transaction
-      const result = await this.prisma.$transaction(async (prisma) => {
+      // Process purchase in transaction
+      await this.prisma.$transaction(async (prisma) => {
         // Deduct fish cost
         const updatedUser = await prisma.user.update({
           where: { id: userId },
@@ -92,147 +136,112 @@ export class BoostService {
           },
         });
 
-        // Create initial 4-hour double boost (speed * 2)
-        const initialSpeedBoost = await prisma.autoBoost.create({
+        // Create boost
+        const boost = await prisma.autoBoost.create({
           data: {
             userId,
-            boostType: 'speedBoost',
+            boostType: 'speed',
             multiplier: boostPackage.speed,
-            expiresAt: initialBoostExpires,
+            expiresAt,
           },
         });
 
-        const initialCrocoBoost = await prisma.autoBoost.create({
-          data: {
-            userId,
-            boostType: 'crocoBoost',
-            multiplier: 2, // Double the Croco reward
-            expiresAt: initialBoostExpires,
-          },
-        });
-
-        // Create remaining 20-hour normal boost
-        const remainingSpeedBoost = await prisma.autoBoost.create({
-          data: {
-            userId,
-            boostType: 'speedBoost',
-            multiplier: boostPackage.speed,
-            expiresAt: totalBoostExpires,
-          },
-        });
-
-        return {
-          initialSpeedBoost,
-          initialCrocoBoost,
-          remainingSpeedBoost,
-          updatedUser,
-        };
+        return { boost, updatedUser };
       });
 
       return {
         success: true,
-        message: `Boost activated: ${boostPackage.speed}x speed with 2x Croco for 4 hours, then ${boostPackage.speed}x speed for 20 hours`,
-        boost: result,
+        message: `Activated ${boostPackage.speed}x speed boost for ${boostPackage.duration} days`,
+        boost: {
+          id: boostPackage.id,
+          speed: boostPackage.speed,
+          duration: boostPackage.duration,
+          fishPrice: boostPackage.fishPrice,
+          active: true,
+          remainingTime: durationHours * 3600, // Convert hours to seconds
+        },
       };
     } catch (error) {
       this.logger.error(`Failed to purchase boost: ${error.message}`);
       return {
         success: false,
-        message: 'Failed to activate boost',
+        message: 'Failed to purchase boost',
       };
     }
   }
 
-  async getCurrentBoosts(userId: number): Promise<{
-    speedMultiplier: number;
-    crocoMultiplier: number;
-    initialBoostRemaining?: number;
-    totalBoostRemaining?: number;
-  }> {
-    const now = new Date();
-    const activeBoosts = await this.prisma.autoBoost.findMany({
+  /**
+   * Get active boost multiplier for user
+   */
+  async getCurrentBoost(userId: number): Promise<number> {
+    const activeBoost = await this.prisma.autoBoost.findFirst({
       where: {
         userId,
-        expiresAt: { gt: now },
+        boostType: 'speed',
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: {
+        multiplier: 'desc', // Get highest multiplier if multiple boosts
       },
     });
 
-    const speedBoost = activeBoosts.find((b) => b.boostType === 'speedBoost');
-    const crocoBoost = activeBoosts.find((b) => b.boostType === 'crocoBoost');
-
-    const initialBoostEnd = activeBoosts
-      .filter((b) => b.boostType === 'crocoBoost')
-      .map((b) => b.expiresAt)[0];
-
-    const totalBoostEnd = activeBoosts
-      .filter((b) => b.boostType === 'speedBoost')
-      .map((b) => b.expiresAt)
-      .sort((a, b) => b.getTime() - a.getTime())[0];
-
-    return {
-      speedMultiplier: speedBoost ? speedBoost.multiplier : 1,
-      crocoMultiplier: crocoBoost ? crocoBoost.multiplier : 1,
-      initialBoostRemaining: initialBoostEnd
-        ? Math.max(0, initialBoostEnd.getTime() - now.getTime()) / 1000
-        : 0,
-      totalBoostRemaining: totalBoostEnd
-        ? Math.max(0, totalBoostEnd.getTime() - now.getTime()) / 1000
-        : 0,
-    };
+    return activeBoost ? activeBoost.multiplier : 1;
   }
 
-  async calculateReward(userId: number, baseReward: number): Promise<number> {
-    const boosts = await this.getCurrentBoosts(userId);
-    return baseReward * boosts.speedMultiplier * boosts.crocoMultiplier;
-  }
-
+  /**
+   * Clean up expired boosts
+   */
   @Cron(CronExpression.EVERY_MINUTE)
-  async processBoosts() {
-    const now = new Date();
-
+  async cleanupExpiredBoosts() {
     try {
-      // Clean up expired boosts
       await this.prisma.autoBoost.deleteMany({
         where: {
-          expiresAt: { lt: now },
+          expiresAt: { lt: new Date() },
+          boostType: 'speed',
         },
       });
-
-      // Update active eggs with current speed multipliers
-      const activeEggs = await this.prisma.egg.findMany({
-        where: {
-          isIncubating: true,
-          hatchProgress: { lt: 100 },
-        },
-        include: {
-          user: {
-            include: {
-              autoBoosts: {
-                where: {
-                  boostType: 'speedBoost',
-                  expiresAt: { gt: now },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      for (const egg of activeEggs) {
-        const speedBoost = egg.user.autoBoosts[0];
-        const newSpeed = speedBoost ? speedBoost.multiplier : 1;
-
-        if (egg.hatchSpeed !== newSpeed) {
-          await this.prisma.egg.update({
-            where: { id: egg.id },
-            data: {
-              hatchSpeed: newSpeed,
-            },
-          });
-        }
-      }
     } catch (error) {
-      this.logger.error(`Error processing boosts: ${error.message}`);
+      this.logger.error(`Failed to cleanup expired boosts: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get user's active boosts
+   */
+  async getUserActiveBoosts(userId: number): Promise<{
+    success: boolean;
+    activeBoosts: Array<{
+      speed: number;
+      remainingTime: number;
+      expiresAt: Date;
+    }>;
+  }> {
+    try {
+      const activeBoosts = await this.prisma.autoBoost.findMany({
+        where: {
+          userId,
+          boostType: 'speed',
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: {
+          expiresAt: 'desc',
+        },
+      });
+
+      return {
+        success: true,
+        activeBoosts: activeBoosts.map((boost) => ({
+          speed: boost.multiplier,
+          remainingTime:
+            Math.max(0, boost.expiresAt.getTime() - Date.now()) / 1000,
+          expiresAt: boost.expiresAt,
+        })),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        activeBoosts: [],
+      };
     }
   }
 }

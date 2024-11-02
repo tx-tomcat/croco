@@ -8,6 +8,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { CacheService } from '../cache/cache.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { UserModule } from '../user/user.module';
+import { EggService } from '../user/egg.service';
 
 @Module({
   imports: [
@@ -18,7 +19,13 @@ import { UserModule } from '../user/user.module';
       token: process.env.TELEGRAM_TOKEN,
     }),
   ],
-  providers: [AuthService, JwtStrategy, PrismaService, CacheService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    PrismaService,
+    CacheService,
+    EggService,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

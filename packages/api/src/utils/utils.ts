@@ -60,6 +60,27 @@ export async function groupByProject(data: any[]): Promise<any[]> {
   return Object.values(result);
 }
 
+export const getNextSpeedLevel = (speed: number): number => {
+  switch (speed) {
+    case 1:
+      return 2;
+    case 2:
+      return 3;
+    case 3:
+      return 5;
+    case 5:
+      return 8;
+    case 8:
+      return 13;
+    case 13:
+      return 20;
+    case 20:
+      return 25;
+    default:
+      return speed;
+  }
+};
+
 export const ADMIN_ADDRESS = '0x2DEF55F3180f47F86D9239b26583a5053Eb22157';
 
 export const transferEventAbi = [

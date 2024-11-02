@@ -6,26 +6,37 @@ import {
   Param,
   UseGuards,
   Request,
+  Body,
 } from '@nestjs/common';
 import { BoostService } from './boost.service';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'auth/jwt-auth.guard';
 
-@Controller('boost')
+@Controller('boosts')
 export class BoostController {
   constructor(private readonly boostService: BoostService) {}
 
-  @Post('purchase/:boostId')
-  @UseGuards(AuthGuard('jwt'))
-  async purchaseBoost(@Request() req, @Param('boostId') boostId: string) {
-    return await this.boostService.purchaseBoost(
-      req.user.id,
-      parseInt(boostId),
-    );
+  @Get('available')
+  @UseGuards(JwtAuthGuard)
+  async getAvailableBoosts(@Request() req) {
+    return await this.boostService.getAvailableBoosts(req.user.id);
+  }
+
+  @Post('purchase')
+  @UseGuards(JwtAuthGuard)
+  async purchaseBoost(@Request() req, @Body() body: { boostId: number }) {
+    return await this.boostService.purchaseBoost(req.user.id, body.boostId);
+  }
+
+  @Get('active')
+  @UseGuards(JwtAuthGuard)
+  async getActiveBoosts(@Request() req) {
+    return await this.boostService.getUserActiveBoosts(req.user.id);
   }
 
   @Get('current')
-  @UseGuards(AuthGuard('jwt'))
-  async getCurrentBoosts(@Request() req) {
-    return await this.boostService.getCurrentBoosts(req.user.id);
+  @UseGuards(JwtAuthGuard)
+  async getCurrentBoost(@Request() req) {
+    const multiplier = await this.boostService.getCurrentBoost(req.user.id);
+    return { multiplier };
   }
 }

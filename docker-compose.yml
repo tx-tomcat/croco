@@ -1,14 +1,14 @@
 services:
   app:
     expose:
-      - "5000"
+      - "7000"
     build: .
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.entrypoints=web"
-      - "traefik.http.routers.app.rule=Host(`zupad.org`)"
-      - "traefik.http.routers.zupad-api.rule=Host(`zupad.org`) && PathPrefix(`/api/v1`)"
-      - "traefik.http.services.zupad-api.loadbalancer.server.port=5000"
+      - "traefik.http.routers.app.rule=Host(`crocotg.xyz`)"
+      - "traefik.http.routers.croco-api.rule=Host(`crocotg.xyz`) && PathPrefix(`/api/v1`)"
+      - "traefik.http.services.croco-api.loadbalancer.server.port=7000"
     restart: unless-stopped
     env_file: .env
     depends_on:
@@ -37,9 +37,9 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:5000"
+      - "--entrypoints.web.address=:7000"
     ports:
-      - "5000:5000"
+      - "7000:7000"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 volumes:

@@ -1,12 +1,12 @@
 # This configuration is intended for development purpose, it's **your** responsibility to harden it for production
-name: zupadapp
+name: crocoapp
 services:
   postgresql:
     image: postgres:16.3
     # volumes:
-    #   - ~/volumes/jhipster/zupadApp/postgresql/:/var/lib/postgresql/data/
+    #   - ~/volumes/jhipster/crocoApp/postgresql/:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=zupadApp
+      - POSTGRES_USER=crocoApp
       - POSTGRES_PASSWORD=
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:

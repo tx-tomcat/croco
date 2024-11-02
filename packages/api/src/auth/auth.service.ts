@@ -149,9 +149,7 @@ export class AuthService {
     if (!activeEgg) {
       await this.eggService.createEgg(userDB.id);
     }
-    if (!userDB.xrplAddress) {
-      await this.createXrplWallet(userDB.telegramId);
-    }
+
     const payload = { ...userDB };
 
     return {

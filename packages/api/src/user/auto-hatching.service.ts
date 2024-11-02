@@ -91,24 +91,23 @@ export class AutoHatchingService {
       const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
 
       // Find all users with auto hatching and eligible for claim
+
       const eligibleUsers = await this.prisma.user.findMany({
         where: {
           autoHatching: {
-            some: {}, // Has auto hatching
+            isNot: null,
           },
           OR: [
             { lastDailyReward: null },
             { lastDailyReward: { lt: fourHoursAgo } },
           ],
-          eggs: {
-            some: {
-              isIncubating: true,
-              hatchProgress: { lt: 100 },
-            },
+          egg: {
+            isIncubating: true,
+            hatchProgress: { lt: 100 },
           },
         },
         include: {
-          eggs: {
+          egg: {
             where: {
               isIncubating: true,
               hatchProgress: { lt: 100 },

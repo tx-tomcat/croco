@@ -4,16 +4,32 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import useApi from "@/hooks/useApi";
 import { Button } from "../ui/button";
+import { useToast } from "../ui/use-toast";
+import { useUserStore } from "@/stores/provider";
 
 export const Shop = () => {
-  const getTonList = useApi({
-    key: ["getTonList"],
+  const { toast } = useToast();
+  const { user, saveUser } = useUserStore((state) => state);
+  const getFishList = useApi({
+    key: ["getFishList"],
     method: "GET",
     url: "user/fish-list",
   }).get;
 
+  const getMe = useApi({
+    key: ["getMe"],
+    method: "GET",
+    url: "user/me",
+  }).get;
+
+  const purchaseFishApi = useApi({
+    key: ["purchaseFish"],
+    method: "POST",
+    url: "user/purchase-fish",
+  }).post;
+
   useEffect(() => {
-    getTonList?.refetch();
+    getFishList?.refetch();
   }, []);
 
   return (
@@ -30,7 +46,7 @@ export const Shop = () => {
           )}
         >
           <TabsTrigger value="ton" className="px-0 py-0">
-            <Image src="/images/ton.svg" alt="Ton" width={24} height={24} />
+            <Image src="/images/xrp.svg" alt="Ton" width={24} height={24} />
             <div className="text-center  leading-6">Ton</div>
           </TabsTrigger>
           <TabsTrigger value="star" className="px-0 py-0 ">
@@ -40,13 +56,13 @@ export const Shop = () => {
         </TabsList>
 
         <TabsContent value="ton" className="w-full flex flex-wrap gap-2">
-          {getTonList?.data?.map((item: any, index: number) => (
+          {getFishList?.data?.map((item: any, index: number) => (
             <div
               key={item.id}
               className={cn(
                 "flex flex-col items-center gap-1 p-4 rounded-3xl border border-white w-[48%]",
-                getTonList?.data?.length % 2 === 1 &&
-                  index === getTonList?.data?.length - 1 &&
+                getFishList?.data?.length % 2 === 1 &&
+                  index === getFishList?.data?.length - 1 &&
                   "w-full"
               )}
             >
@@ -65,18 +81,37 @@ export const Shop = () => {
                 <Image src="/images/up.svg" alt="Ton" width={24} height={24} />
                 <div className="flex items-center gap-2">
                   <Image
-                    src="/images/ton.svg"
+                    src="/images/xrp.svg"
                     alt="Ton"
                     width={24}
                     height={24}
                   />
 
                   <div className="1_44 text-black  font-semibold leading-6 capitalize">
-                    {item.priceTON.toLocaleString()}
+                    {item.priceXrpl.toLocaleString()}
                   </div>
                 </div>
               </div>
-              <Button className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa]  font-medium leading-6 capitalize">
+              <Button
+                onClick={() =>
+                  purchaseFishApi
+                    ?.mutateAsync({ fishItemId: item.id })
+                    .then((res) => {
+                      toast({
+                        description: res.message,
+                        variant: res.success ? "success" : "error",
+                      });
+                      getMe?.refetch().then((response) => {
+                        if (response?.data) {
+                          saveUser(response.data);
+                        }
+                      });
+                    })
+                }
+                disabled={purchaseFishApi?.isPending}
+                isLoading={purchaseFishApi?.isPending}
+                className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl bg-white text text-[#00b7aa]  font-medium leading-6 capitalize"
+              >
                 Buy
               </Button>
             </div>
@@ -84,13 +119,13 @@ export const Shop = () => {
         </TabsContent>
 
         <TabsContent value="star" className="w-full flex flex-wrap gap-2">
-          {getTonList?.data?.map((item: any, index: number) => (
+          {getFishList?.data?.map((item: any, index: number) => (
             <div
               key={item.id}
               className={cn(
                 "flex flex-col items-center gap-1 p-4 rounded-3xl border border-white w-[48%]",
-                getTonList?.data?.length % 2 === 1 &&
-                  index === getTonList?.data?.length - 1 &&
+                getFishList?.data?.length % 2 === 1 &&
+                  index === getFishList?.data?.length - 1 &&
                   "w-full"
               )}
             >

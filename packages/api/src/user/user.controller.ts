@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -31,7 +32,7 @@ export class UserController {
     return user;
   }
 
-  @Get('/daily-reward')
+  @Post('/claim-token')
   @UseGuards(JwtAuthGuard)
   async claimReward(@Req() req) {
     return this.userService.claimReward(req.user.id);
@@ -58,9 +59,52 @@ export class UserController {
     return fishList;
   }
 
-  @Post(':eggId/start')
+  @Post('/start-hatching')
   @UseGuards(JwtAuthGuard)
   async startHatching(@Req() req) {
     return await this.eggService.startHatching(req.user.id);
   }
+
+  @Get('/referees/:referralCode')
+  @UseGuards(JwtAuthGuard)
+  async getReferees(@Param('referralCode') referralCode: string) {
+    return await this.userService.getReferees(referralCode);
+  }
+
+  @Get('/referrer-rankings')
+  async getReferrerRankings() {
+    return await this.userService.getTopReferrersSQL();
+  }
+
+  @Get('/croco-rankings')
+  async getCrocoRankings() {
+    return await this.userService.getTopCrocoRanking();
+  }
+
+  @Post('/import-wallet')
+  @UseGuards(JwtAuthGuard)
+  async importWallet(@Req() req, @Body() body: { privateKey: string }) {
+    return await this.userService.deriveAndUpdateWallet(
+      req.user.id,
+      body.privateKey,
+    );
+  }
+
+  @Post('create-wallet')
+  @UseGuards(JwtAuthGuard)
+  async createWallet(@Req() req) {
+    return await this.userService.createXrplWallet(req.user.id);
+  }
+
+  @Post('/purchase-fish')
+  @UseGuards(JwtAuthGuard)
+  async purchaseFish(@Req() req, @Body() body: { fishItemId: number }) {
+    return await this.userService.purchaseFish(req.user.id, body.fishItemId);
+  }
+
+  // @Post('/claim-referral-token')
+  // @UseGuards(JwtAuthGuard)
+  // async claimReferralToken(@Req() req) {
+  //   return await this.userService.claimReferralToken(req.user.id);
+  // }
 }

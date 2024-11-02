@@ -21,7 +21,7 @@ export function ErrorPage({
 
       <Button
         onClick={() => {
-          window.open("https://zupad.org", "_blank");
+          window.open("https://crocotg.xyz", "_blank");
         }}
         className="w-fit px-4 capitalize"
       >

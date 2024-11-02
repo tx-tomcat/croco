@@ -38,7 +38,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'https://zupad.org',
+      'https://crocotg.xyz',
       'https://fb6329eaf9bc.ngrok.app',
       'http://localhost:3000',
     ],
