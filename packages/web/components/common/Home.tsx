@@ -95,7 +95,13 @@ export const Home = () => {
         </div>
       </div>
       <div className="flex flex-col items-start gap-2 self-stretch p-4 rounded-3xl border border-white bg-[#ffebad]">
-        <Image src="/images/croco 2.png" alt="Croco" width={268} height={133} />
+        <Image
+          src="/images/croco2.png"
+          alt="Croco"
+          width={268}
+          height={133}
+          className="w-full"
+        />
         <Button
           disabled={startHatching?.isPending || claimToken?.isPending}
           isLoading={startHatching?.isPending || claimToken?.isPending}

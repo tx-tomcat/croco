@@ -8,22 +8,8 @@ import { Shop } from "./Shop";
 
 export const Task = () => {
   const [showShop, setShowShop] = useState(false);
-  const getSpeedList = useApi({
-    key: ["getSpeedList"],
-    method: "GET",
-    url: "user/speed-list",
-  }).get;
 
-  const getBoostList = useApi({
-    key: ["getBoostList"],
-    method: "GET",
-    url: "user/boost-list",
-  }).get;
-
-  useEffect(() => {
-    getSpeedList?.refetch();
-    getBoostList?.refetch();
-  }, []);
+  useEffect(() => {}, []);
 
   if (showShop) {
     return <Shop />;
@@ -50,34 +36,10 @@ export const Task = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="active" className="w-full flex flex-col gap-2">
-          {getSpeedList?.data?.map((item: any, index: number) => (
-            <div
-              key={item.id}
-              className="frame_5 flex flex-col items-start gap-1 p-4 rounded-3xl border border-white"
-            >
-              <div className="join___play_toncapy self-stretch text-black  text-sm font-semibold leading-6 capitalize">
-                Join &amp; Play TonCapy
-              </div>
-              <div className="flex justify-between items-center self-stretch">
-                <div className="flex items-center">
-                  <Image
-                    src="/images/croco.png"
-                    alt="Check"
-                    width={24}
-                    height={24}
-                  />
-                  <div className="_100 text-[#3e997d]  text-sm font-semibold leading-6 capitalize">
-                    +100
-                  </div>
-                </div>
-                <div className="flex justify-center items-center gap-2 py-2 px-4 w-[7.5rem] rounded-2xl bg-white text text-[#00b7aa]  font-medium leading-6 capitalize">
-                  Start
-                </div>
-              </div>
-            </div>
-          ))}
-        </TabsContent>
+        <TabsContent
+          value="active"
+          className="w-full flex flex-col gap-2"
+        ></TabsContent>
       </Tabs>
     </div>
   );
