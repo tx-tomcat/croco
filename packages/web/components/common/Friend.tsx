@@ -63,13 +63,13 @@ export const Friend = () => {
       <div className="flex justify-center items-center gap-2 w-full z-10">
         <Button
           onClick={onShare}
-          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-[#6c28f7] text text-white  text-sm leading-6 uppercase  h-fit"
+          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-primary text text-white  text-sm leading-6 uppercase  h-fit"
         >
           Share
         </Button>
         <Button
           onClick={onCopy}
-          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-[#6c28f7] text text-white  text-sm leading-6 uppercase  h-fit"
+          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-primary text text-white  text-sm leading-6 uppercase  h-fit"
         >
           Copy
         </Button>
