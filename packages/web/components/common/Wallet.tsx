@@ -101,6 +101,7 @@ export const Wallet = () => {
             navigator.clipboard.writeText(user?.xrplAddress || "");
             toast({
               description: "Copied to clipboard",
+              duration: 2000,
             });
           }}
         />

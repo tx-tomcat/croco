@@ -100,6 +100,7 @@ export const Shop = () => {
                       toast({
                         description: res.message,
                         variant: res.success ? "success" : "error",
+                        duration: 2000,
                       });
                       getMe?.refetch().then((response) => {
                         if (response?.data) {

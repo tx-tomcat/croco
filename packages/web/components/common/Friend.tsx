@@ -42,7 +42,7 @@ export const Friend = () => {
       toast({
         description: "Copied to clipboard",
         variant: "success",
-        duration: 1000,
+        duration: 2000,
       });
     } catch (error) {
       console.log(error);

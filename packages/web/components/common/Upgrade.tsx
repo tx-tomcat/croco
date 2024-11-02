@@ -204,6 +204,7 @@ export const Upgrade = () => {
                         ? "Auto hatching purchased"
                         : resp.message,
                       variant: resp.success ? "success" : "error",
+                      duration: 2000,
                     });
                     getMe?.refetch().then((resp) => {
                       if (resp.data) {
@@ -215,6 +216,7 @@ export const Upgrade = () => {
                     toast({
                       description: "Something went wrong",
                       variant: "error",
+                      duration: 2000,
                     });
                   })
               }
@@ -278,6 +280,7 @@ export const Upgrade = () => {
                             ? "Boost purchased"
                             : resp.message,
                           variant: resp.success ? "success" : "error",
+                          duration: 2000,
                         });
                         getMe?.refetch().then((resp) => {
                           if (resp.data) {
@@ -289,6 +292,7 @@ export const Upgrade = () => {
                         toast({
                           description: "Something went wrong",
                           variant: "error",
+                          duration: 2000,
                         });
                       })
                   }

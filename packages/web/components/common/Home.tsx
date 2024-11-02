@@ -113,6 +113,7 @@ export const Home = () => {
                 toast({
                   description: res.message,
                   variant: res.success ? "success" : "error",
+                  duration: 2000,
                 });
               });
               return;
@@ -124,6 +125,7 @@ export const Home = () => {
                 toast({
                   description: res.message,
                   variant: res.success ? "success" : "error",
+                  duration: 2000,
                 });
               });
             }
