@@ -20,5 +20,5 @@ jobs:
           script: |
             cd /root/croco/
             git pull origin main 
-            docker compose up -d --build --remove-orphans --scale app=3
+            docker compose up -d --build --remove-orphans
             docker rollout app

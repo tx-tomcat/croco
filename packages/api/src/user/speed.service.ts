@@ -1,7 +1,7 @@
 // speed-upgrade.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { getNextSpeedLevel } from 'utils/utils';
+import { getNextSpeedLevel } from '../utils/utils';
 
 export interface SpeedPackage {
   id: number;
