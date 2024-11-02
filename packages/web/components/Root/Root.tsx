@@ -66,7 +66,7 @@ function RootInner({ children }: PropsWithChildren) {
       manifestUrl={manifestUrl}
       uiPreferences={{ theme: THEME.DARK }}
       actionsConfiguration={{
-        twaReturnUrl: "https://t.me/tingdepin_bot/join",
+        twaReturnUrl: "https://t.me/crocoxrplbot/join",
       }}
     >
       <SDKProvider acceptCustomStyles debug={debug}>

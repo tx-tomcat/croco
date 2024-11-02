@@ -4,9 +4,13 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { Avatar } from "../ui/avatar";
+import { useToast } from "../ui/use-toast";
+import { useUtils } from "@telegram-apps/sdk-react";
 
 export const Friend = () => {
   const { user } = useUserStore((state) => state);
+  const { toast } = useToast();
+  const utils = useUtils();
   const getRefereesApi = useApi({
     key: ["referees"],
     method: "GET",
@@ -16,6 +20,34 @@ export const Friend = () => {
   useEffect(() => {
     getRefereesApi?.refetch();
   }, [user?.referralCode]);
+
+  const onShare = async () => {
+    try {
+      if (!user?.referralCode) return;
+      utils.shareURL(
+        "https://t.me/crocoxrplbot/join?startapp=" + user?.referralCode,
+        "Incubate your eggs"
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onCopy = async () => {
+    try {
+      if (!user?.referralCode) return;
+      navigator.clipboard.writeText(
+        "https://t.me/crocoxrplbot/join?startapp=" + user?.referralCode
+      );
+      toast({
+        description: "Copied to clipboard",
+        variant: "success",
+        duration: 1000,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="flex flex-col items-center gap-1 w-full px-12">
       {getRefereesApi?.data?.referees.length === 0 && (
@@ -27,6 +59,20 @@ export const Friend = () => {
       <div className="self-stretch text-black text-center  font-light leading-6">
         Earn 15% for your direct referrals, 8% for their referrals, then 5%, 2%,
         and 1% for your fifth-level referrals.{" "}
+      </div>
+      <div className="flex justify-center items-center gap-2 w-full z-10">
+        <Button
+          onClick={onShare}
+          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-[#6c28f7] text text-white  text-sm leading-6 uppercase  h-fit"
+        >
+          Share
+        </Button>
+        <Button
+          onClick={onCopy}
+          className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-lg bg-[#6c28f7] text text-white  text-sm leading-6 uppercase  h-fit"
+        >
+          Copy
+        </Button>
       </div>
       {getRefereesApi?.data?.referees.length > 0 && (
         <div className="flex items-center">
