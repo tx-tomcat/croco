@@ -28,6 +28,6 @@ COPY --from=build /usr/app/packages/web/out ./packages/api/dist/static
 
 
 
-EXPOSE 5000
+EXPOSE 7000
 
 ENTRYPOINT ["node", "/usr/app/packages/api/dist/main.js"]

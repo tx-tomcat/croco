@@ -15,6 +15,6 @@ RUN chmod +x /usr/src/app
 RUN npx prisma generate --schema=/usr/src/app/prisma/schema.prisma  
 
 RUN pnpm run build
-EXPOSE 5000
+EXPOSE 7000
 
 CMD ["pnpm", "run", "prod"]
