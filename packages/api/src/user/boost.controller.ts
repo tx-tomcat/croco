@@ -9,7 +9,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { BoostService } from './boost.service';
-import { JwtAuthGuard } from 'auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('boosts')
 export class BoostController {

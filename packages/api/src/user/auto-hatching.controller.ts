@@ -1,7 +1,7 @@
 // auto-hatching.controller.ts
 import { Controller, Post, Get, UseGuards, Request } from '@nestjs/common';
 import { AutoHatchingService } from './auto-hatching.service';
-import { JwtAuthGuard } from 'auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('auto-hatching')
 export class AutoHatchingController {
