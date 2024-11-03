@@ -27,7 +27,7 @@ model User {
   totalTokenReferral   Float          @default(0)
   claimedTokenReferral Float          @default(0)
   referralLevel        Int            @default(0)
-  treePath             String?
+  treePath             String         @default("")
   xrplAddress          String?        @unique
   xrplSeed             String?
   xrplPublicKey        String?
