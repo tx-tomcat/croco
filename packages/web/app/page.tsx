@@ -101,7 +101,7 @@ const HomePage = () => {
     initAuth();
   }, []);
 
-  if (!user) return <div className="root__loading">Loading</div>;
+  if (!user) return <div className="root__loading">Fetching user data...</div>;
   return (
     <div className="flex w-[var(--tg-viewport-width)] px-8 flex-col h-full items-center">
       <Tabs
