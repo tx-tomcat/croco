@@ -33,12 +33,6 @@ export const Wallet = () => {
     key: ["create-wallet"],
   }).post;
 
-  const getMeApi = useApi({
-    method: "GET",
-    url: "user/me",
-    key: ["me"],
-  }).get;
-
   if (!user?.xrplAddress)
     return (
       <div className="flex flex-col items-center gap-1 w-full">
@@ -53,9 +47,12 @@ export const Wallet = () => {
         </Button>
         <Button
           onClick={() =>
-            createWalletApi?.mutateAsync({}).then(() => {
-              getMeApi?.refetch().then((res) => {
-                saveUser(res.data);
+            createWalletApi?.mutateAsync({}).then(async (walletData) => {
+              const { address, publicKey } = walletData;
+              saveUser({
+                ...user,
+                xrplAddress: address,
+                xrplPublicKey: publicKey,
               });
             })
           }

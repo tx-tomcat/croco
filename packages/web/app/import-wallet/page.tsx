@@ -5,11 +5,12 @@ import useApi from "@/hooks/useApi";
 import { useUserStore } from "@/stores/provider";
 import { initBackButton } from "@telegram-apps/sdk-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const ImportWallet = () => {
   const { user, saveUser } = useUserStore((state) => state);
   const [backButton] = initBackButton();
+  const [privateKey, setPrivateKey] = useState("");
   const router = useRouter();
   useEffect(() => {
     backButton.show();
@@ -37,19 +38,21 @@ const ImportWallet = () => {
       <Input
         className="flex items-start gap-4 self-stretch py-2 px-3 rounded-xl bg-white text text-black text-sm font-light leading-6"
         placeholder=" Enter your private key to login"
-        value={"sEdVN2Zs63pM6vQPK8s642Uo5YV8ygF"}
+        onChange={(e) => setPrivateKey(e.target.value)}
       />
 
       <Button
         onClick={() =>
           importWalletApi
             ?.mutateAsync({
-              privateKey: "sEdVN2Zs63pM6vQPK8s642Uo5YV8ygF",
+              privateKey,
             })
-            .then((res) => {
-              getMeApi?.refetch().then((res) => {
-                saveUser(res.data);
-                router.push("/");
+            .then(async (walletData) => {
+              const { address, publicKey } = walletData;
+              saveUser({
+                ...user,
+                xrplAddress: address,
+                xrplPublicKey: publicKey,
               });
             })
         }

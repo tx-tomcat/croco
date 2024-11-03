@@ -34,7 +34,7 @@ const HomePage = () => {
   const lp = useLaunchParams();
   const loginInProgress = useRef(false);
   const [activeTab, setActiveTab] = React.useState<TABS>(TABS.HOME);
-  const { saveUser } = useUserStore((state) => state);
+  const { user, saveUser } = useUserStore((state) => state);
 
   const [backButton] = initBackButton();
 
@@ -101,6 +101,7 @@ const HomePage = () => {
     initAuth();
   }, []);
 
+  if (!user) return <div className="root__loading">Loading</div>;
   return (
     <div className="flex w-[var(--tg-viewport-width)] px-8 flex-col h-full items-center">
       <Tabs
