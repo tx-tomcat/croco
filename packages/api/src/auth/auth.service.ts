@@ -105,7 +105,7 @@ export class AuthService {
       });
       if (referrer) {
         treePath = referrer.treePath;
-        const referrerPathParts = referrer.treePath.split('.');
+        const referrerPathParts = (referrer.treePath || '').split('.');
         if (referrerPathParts.length < 5) {
           treePath = `${referrer.treePath}${treePath === '' ? '' : '.'}${referralCode}`;
         } else {
