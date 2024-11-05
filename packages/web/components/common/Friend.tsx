@@ -100,7 +100,7 @@ export const Friend = () => {
       )}
       {getRefereesApi?.data?.referees?.map((referee: any, index: number) => (
         <div
-          className=" flex justify-between items-center p-4 rounded-3xl border border-white"
+          className=" flex justify-between items-center p-4 rounded-3xl border border-white w-full"
           key={index}
         >
           <div className="flex items-center gap-1">
