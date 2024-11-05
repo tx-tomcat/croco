@@ -12,7 +12,7 @@ import { useXrplFaucet } from "@/hooks/useXrplFaucet";
 import { useToast } from "../ui/use-toast";
 export const Wallet = () => {
   const { user, saveUser } = useUserStore((state) => state);
-  const { requestFunds } = useXrplFaucet();
+  const { requestFunds, loading } = useXrplFaucet();
   const { toast } = useToast();
 
   const { xrp, refreshBalance } = useXrplBalance(
@@ -23,6 +23,10 @@ export const Wallet = () => {
   const handleRequestFunds = async () => {
     await requestFunds(user?.xrplAddress || "");
     // Refresh balance after successful request
+    toast({
+      description: "Funds requested successfully",
+      duration: 2000,
+    });
     refreshBalance();
   };
 
@@ -124,6 +128,8 @@ export const Wallet = () => {
         </Button>
         <Button
           onClick={() => handleRequestFunds()}
+          disabled={loading}
+          isLoading={loading}
           className="button-1 flex justify-center items-center gap-2 py-2 px-4 rounded-2xl bg-white text-1 text-[#00b7aa] font-medium leading-6 capitalize w-full"
         >
           Faucet
