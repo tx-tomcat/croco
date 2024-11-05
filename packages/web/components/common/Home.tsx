@@ -46,7 +46,8 @@ export const Home = () => {
     }
     if (
       new Date(user?.egg?.lastIncubationStart).getTime() + 4 * 60 * 60 * 1000 <
-      new Date().getTime()
+        new Date().getTime() &&
+      !user?.egg?.lastIncubationStart
     ) {
       return 0;
     }

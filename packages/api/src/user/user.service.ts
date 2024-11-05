@@ -341,7 +341,7 @@ export class UserService extends PrismaCrudService implements OnModuleInit {
   }> {
     const user = await this.findById(userId);
     const egg = await this.prismaService.egg.findFirst({
-      where: { userId, isIncubating: true, hatchProgress: { gte: 100 } },
+      where: { userId, isIncubating: true },
     });
     if (!user) {
       return { eligible: false, message: 'User not found' };
@@ -502,14 +502,13 @@ export class UserService extends PrismaCrudService implements OnModuleInit {
     eggProgress?: number;
     isIncubationStopped?: boolean;
   }> {
-    const { eligible, activeEgg, user } =
+    const { eligible, activeEgg, user, message } =
       await this.isEligibleForReward(userId);
-    console.log(eligible, activeEgg, user);
+    console.log(message);
     if (!eligible) {
       return {
         success: false,
-        message:
-          'Not eligible for reward yet. Please wait for the current cycle to complete.',
+        message,
       };
     }
 
