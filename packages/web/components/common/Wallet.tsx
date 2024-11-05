@@ -122,6 +122,12 @@ export const Wallet = () => {
         >
           Transfer
         </Button>
+        <Button
+          onClick={() => handleRequestFunds()}
+          className="button-1 flex justify-center items-center gap-2 py-2 px-4 rounded-2xl bg-white text-1 text-[#00b7aa] font-medium leading-6 capitalize w-full"
+        >
+          Faucet
+        </Button>
       </div>
       <Button
         onClick={() => router.push("/private-key")}

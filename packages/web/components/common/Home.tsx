@@ -106,7 +106,12 @@ export const Home = () => {
           disabled={startHatching?.isPending || claimToken?.isPending}
           isLoading={startHatching?.isPending || claimToken?.isPending}
           onClick={() => {
-            if (user?.egg?.hatchProgress === 100) {
+            if (
+              user?.egg?.isIncubating &&
+              new Date(user?.egg?.lastIncubationStart ?? "").getTime() +
+                4 * 60 * 60 * 1000 <
+                new Date().getTime()
+            ) {
               claimToken?.mutateAsync({}).then(async (res) => {
                 const user = await getUser?.refetch();
                 saveUser(user?.data);
