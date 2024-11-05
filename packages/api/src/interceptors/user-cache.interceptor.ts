@@ -33,7 +33,7 @@ export class UserCacheInterceptor implements NestInterceptor {
       }
 
       if (request.method === 'POST') {
-        await this.cacheService.deleteCache(key);
+        await this.cacheService.clearCache();
         return next.handle();
       }
       const cachedData = await this.cacheService.getCache(key);

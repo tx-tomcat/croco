@@ -27,4 +27,8 @@ export class CacheService {
   async deleteCache(key: string) {
     return await this.cacheManager.del(key);
   }
+
+  async clearCache() {
+    return await this.cacheManager.reset();
+  }
 }
