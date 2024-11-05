@@ -147,5 +147,5 @@ export const formatXrpBalance = (
   decimals: number = 2
 ): string => {
   const num = parseFloat(balance);
-  return `${num.toFixed(decimals)} XRP`;
+  return `${Number(num.toFixed(decimals)).toLocaleString()} XRP`;
 };

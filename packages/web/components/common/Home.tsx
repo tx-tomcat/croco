@@ -91,7 +91,7 @@ export const Home = () => {
         <div className="flex items-center">
           <Image src="/images/croco.png" alt="Coin" width={32} height={32} />
           <div className="13_000 text-[#3e997d] text-2xl leading-8 capitalize">
-            {user?.crocoBalance?.toFixed(2).toLocaleString()}
+            {Number(user?.crocoBalance.toFixed(2)).toLocaleString()}
           </div>
         </div>
       </div>
