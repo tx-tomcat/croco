@@ -109,7 +109,7 @@ export const Leaderboard = () => {
                 </div>
               </div>
               <div className="_1 text-[#3e997d]  text-sm font-semibold leading-6 capitalize">
-                #1
+                #{index + 1}
               </div>
             </div>
           ))}
@@ -148,7 +148,7 @@ export const Leaderboard = () => {
                   </div>
                 </div>
                 <div className="_1 text-[#3e997d]  text-sm font-semibold leading-6 capitalize">
-                  #1
+                  #{index + 1}
                 </div>
               </div>
             )
