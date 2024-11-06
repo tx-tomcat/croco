@@ -177,7 +177,7 @@ export const Upgrade = () => {
           </div>
           <div className="frame_5 flex flex-col items-center gap-1 p-4 rounded-3xl border border-white">
             <Image
-              src="/images/croco 2.png"
+              src="/images/croco2.png"
               alt="Hatching"
               width={268}
               height={133}
