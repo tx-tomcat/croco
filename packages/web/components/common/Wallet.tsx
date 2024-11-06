@@ -37,6 +37,12 @@ export const Wallet = () => {
     key: ["create-wallet"],
   }).post;
 
+  const logoutWalletApi = useApi({
+    method: "POST",
+    url: "user/logout-wallet",
+    key: ["logout-wallet"],
+  }).post;
+
   if (!user?.xrplAddress)
     return (
       <div className="flex flex-col items-center gap-1 w-full">
@@ -142,7 +148,21 @@ export const Wallet = () => {
         Private key
       </Button>
       <Button
-        onClick={() => logout()}
+        onClick={() => {
+          logoutWalletApi
+            ?.mutateAsync({})
+            .then((resp) => {
+              if (resp.success) {
+                logout();
+              }
+            })
+            .catch((err) => {
+              toast({
+                description: err.message,
+                duration: 2000,
+              });
+            });
+        }}
         className="flex justify-center items-center gap-2 self-stretch py-2 px-4 rounded-2xl border border-[#1f1f1f] bg-transparent text-3 text-[#e03232] font-medium leading-6 capitalize"
       >
         Logout

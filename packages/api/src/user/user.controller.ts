@@ -102,6 +102,12 @@ export class UserController {
     return await this.userService.purchaseFish(req.user.id, body.fishItemId);
   }
 
+  @Post('/logout-wallet')
+  @UseGuards(JwtAuthGuard)
+  async logoutWallet(@Req() req) {
+    return await this.userService.logoutWallet(req.user.id);
+  }
+
   // @Post('/claim-referral-token')
   // @UseGuards(JwtAuthGuard)
   // async claimReferralToken(@Req() req) {

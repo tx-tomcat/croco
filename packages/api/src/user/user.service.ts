@@ -37,6 +37,22 @@ export class UserService extends PrismaCrudService implements OnModuleInit {
     await this.xrplClient.connect();
   }
 
+  async logoutWallet(userId: number) {
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        xrplAddress: null,
+        xrplSeed: null,
+        xrplPublicKey: null,
+        xrplPrivateKey: null,
+      },
+    });
+    return {
+      success: true,
+      message: 'Wallet logged out successfully',
+    };
+  }
+
   async createXrplWallet(userId: number): Promise<{
     address: string;
     publicKey: string;
