@@ -5,8 +5,8 @@ services:
     build: .
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.entrypoints=web"
-      - "traefik.http.routers.app.rule=Host(`crocotg.xyz`)"
+      - "traefik.http.routers.croco.entrypoints=web"
+      - "traefik.http.routers.croco.rule=Host(`crocotg.xyz`)"
       - "traefik.http.routers.croco-api.rule=Host(`crocotg.xyz`) && PathPrefix(`/api/v1`)"
       - "traefik.http.services.croco-api.loadbalancer.server.port=7000"
     restart: unless-stopped
