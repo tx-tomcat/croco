@@ -47,12 +47,12 @@ export const Shop = () => {
         >
           <TabsTrigger value="ton" className="px-0 py-0">
             <Image src="/images/xrp.svg" alt="Ton" width={24} height={24} />
-            <div className="text-center  leading-6">Ton</div>
+            <div className="text-center  leading-6">XRP</div>
           </TabsTrigger>
-          <TabsTrigger value="star" className="px-0 py-0 ">
+          {/* <TabsTrigger value="star" className="px-0 py-0 ">
             <Image src="/images/star.png" alt="Star" width={24} height={24} />
             <div className="text-center  leading-6">Star</div>
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="ton" className="w-full flex flex-wrap gap-2">
